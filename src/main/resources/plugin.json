@@ -1,0 +1,7 @@
+{
+  "name": "tower-defence-plugin",
+  "author": "DronazU",
+  "main": "core.Main",
+  "description": "Tower defence.",
+  "version": "1.0"
+}
