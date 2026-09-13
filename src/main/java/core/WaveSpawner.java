@@ -38,7 +38,7 @@ public class WaveSpawner {
     public void spawnWave() {
         if (spawnPoints.isEmpty()) return;
 
-        healthMultiplier = 0.25f + currentWave * 0.12f;
+        healthMultiplier = 0.25f * Mathf.pow(1.06f, currentWave);
 
         int unitCount = Mathf.random(5 + currentWave / 2, 10 + currentWave / 2);
         if (unitCount > 100) unitCount = Mathf.random(75, 100);
@@ -53,6 +53,7 @@ public class WaveSpawner {
                 float y = point.y + Mathf.range(12f);
                 Unit unit = type.create(Team.crux);
                 unit.set(x, y);
+                unit.controller(type.aiController.get());
                 unit.health = unit.maxHealth * healthMultiplier;
                 unit.add();
             }
@@ -104,7 +105,7 @@ public class WaveSpawner {
         available.shuffle();
         for (int i = 0; i < typesCount; i++) {
             Item item = available.get(i);
-            int amount = Mathf.random(1, 25);
+            int amount = Mathf.random(10, 50);
             loot.add(new ItemStack(item, amount));
         }
 
