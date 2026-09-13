@@ -86,23 +86,25 @@ public class WaveSpawner {
         if (wave >= 15) {
             available.add(Items.graphite);
             available.add(Items.metaglass);
-            available.add(Items.silicon);
         }
         if (wave >= 30) {
+            available.add(Items.silicon);
             available.add(Items.titanium);
+        }
+        if (wave >= 45) {
             available.add(Items.plastanium);
+            available.add(Items.phaseFabric);
         }
         if (wave >= 60) {
             available.add(Items.thorium);
-            available.add(Items.phaseFabric);
             available.add(Items.surgeAlloy);
         }
 
-        int typesCount = Mathf.random(1, (available.size > 3 ? available.size : available.size / 2));
+        int typesCount = Mathf.random(1, Math.min(3, available.size));
         available.shuffle();
         for (int i = 0; i < typesCount; i++) {
             Item item = available.get(i);
-            int amount = Mathf.random(1, 50);
+            int amount = Mathf.random(1, 25);
             loot.add(new ItemStack(item, amount));
         }
 

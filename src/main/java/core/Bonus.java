@@ -53,12 +53,12 @@ public class Bonus {
             Color color = switch (bonus) {
                 case FREEZE -> Color.cyan;
                 case STUN -> Color.yellow;
-                case POISON -> Color.green;
+                case POISON -> Color.purple;
                 case FIRE -> Color.orange;
-                case DISARMING -> Color.purple;
+                case DISARMING -> Color.white;
                 case BLAST -> Color.red;
             };
-            Call.effect(Fx.trailFade, unit.x, unit.y, 0, color);
+            Call.effect(Fx.circleColorSpark, unit.x, unit.y, 0, color, 0);
         });
     }
 
@@ -68,18 +68,28 @@ public class Bonus {
         switch (bonus) {
             case FREEZE -> {
                 applyEffect(StatusEffects.freezing);
+                Call.sendMessage("[cyan]Freezing...");
             }
             case FIRE -> {
                 applyEffect(StatusEffects.melting, StatusEffects.burning);
+                Call.sendMessage("[orange]Firing...");
             }
-            case STUN -> applyEffect(StatusEffects.unmoving, StatusEffects.slow);
+            case STUN -> {
+                applyEffect(StatusEffects.unmoving, StatusEffects.slow);
+                Call.sendMessage("[yellow]Stunning...");
+            }
             case BLAST -> {
                 createExplosion(event.unit, 10f * Vars.tilesize);
+                Call.sendMessage("[red]Exploding...");
             }
             case POISON -> {
                 applyEffect(StatusEffects.corroded);
+                Call.sendMessage("[purple]Poisoning...");
             }
-            case DISARMING -> applyEffect(StatusEffects.disarmed);
+            case DISARMING -> {
+                applyEffect(StatusEffects.disarmed);
+                Call.sendMessage("[white]Disarming...");
+            }
         }
         markedUnits.remove(event.unit);
     }
