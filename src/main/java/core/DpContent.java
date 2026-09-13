@@ -6,6 +6,7 @@ import mindustry.ctype.ContentType;
 import mindustry.game.EventType;
 import mindustry.world.Block;
 import mindustry.world.Tile;
+import mindustry.world.blocks.ConstructBlock;
 
 public class DpContent {
     public static Block
@@ -18,7 +19,8 @@ public class DpContent {
 
     public static void onBlockBuildBeginEvent(EventType.BlockBuildBeginEvent event) {
         if (!event.breaking) return;
-        if (event.tile.block() != dpRoadWall) return;
+        if (!(event.tile.build instanceof ConstructBlock.ConstructBuild build)) return;
+        if (build.current != dpRoadWall) return;
         event.tile.setNet(dpRoadWall, event.team, 0);
     }
 
