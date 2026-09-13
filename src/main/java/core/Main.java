@@ -13,6 +13,8 @@ import mindustry.world.Tile;
 
 import java.util.Random;
 
+import static core.DpContent.load;
+
 public class Main extends Plugin {
     public final WaveSpawner waveSpawner = new WaveSpawner();
     public final TowerFreeze towerFreeze = new TowerFreeze();
@@ -28,10 +30,12 @@ public class Main extends Plugin {
         Timer.schedule(ui::update, 0f, 1f);
         Timer.schedule(base::update, 0f, 0.2f);
 
+
         Events.run(EventType.Trigger.update, this::update);
         Events.on(EventType.BlockBuildEndEvent.class, towerFreeze::onBlockBuildEndEvent);
         Events.on(EventType.BlockDestroyEvent.class, towerFreeze::onBlockDestroyEvent);
         Events.on(EventType.WorldLoadEvent.class, e -> {
+            load();
             waveSpawner.reset();
             base.reset();
             bonus.reset();
@@ -45,6 +49,7 @@ public class Main extends Plugin {
             bonus.onUnitDestroyEvent(event);
         });
         Events.on(EventType.BuildDamageEvent.class, base::onBuildDamageEvent);
+        Events.on(EventType.BlockBuildBeginEvent.class, DpContent::onBlockBuildBeginEvent);
     }
 
     public void update() {
@@ -62,7 +67,7 @@ public class Main extends Plugin {
             if (tile == null) continue;
             if (tile.block() == target) {
                 tile.setFloor(Blocks.empty.asFloor());
-                tile.setBlock(Blocks.metalWall2);
+                tile.setBlock(DpContent.dpRoadWall, WaveSpawner.activeTeam);
             }
         }
     }
