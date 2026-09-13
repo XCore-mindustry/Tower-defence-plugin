@@ -30,7 +30,7 @@ public class WaveSpawner {
     public static Team activeTeam = Team.sharded;
     public Block spawnBlock = Blocks.spawn;
     public static int killedEnemies = 0;
-    public static float firstWaveTimer = 60f;
+    public static float waveTimer = 60f;
 
     public static Seq<Vec2> spawnPoints = new Seq<>();
     public static Seq<CoreBlock.CoreBuild> cores = new Seq<>();
@@ -66,7 +66,7 @@ public class WaveSpawner {
         int alive = Groups.unit.count(u -> u.isValid() && !u.dead() && u.team() != activeTeam);
         if (alive == 0 && isWaveActive) {
             isWaveActive = false;
-            if (firstWaveTimer > 5) firstWaveTimer = 5;
+            if (waveTimer > 5) waveTimer = 5;
         }
         Seq<ItemStack> loot = new Seq<>(getLootForEnemy(currentWave));
         if (Team.sharded.core() != null) {
@@ -178,10 +178,10 @@ public class WaveSpawner {
     }
 
     public void update() {
-        firstWaveTimer -= Time.delta / 60f;
-        if (firstWaveTimer <= 0f) {
+        waveTimer -= Time.delta / 60f;
+        if (waveTimer <= 0f) {
             spawnWave();
-            firstWaveTimer = waveInterval;
+            waveTimer = waveInterval;
         }
     }
 
@@ -190,7 +190,7 @@ public class WaveSpawner {
         healthMultiplier = 0.25f;
         isWaveActive = false;
         killedEnemies = 0;
-        firstWaveTimer = 60f;
+        waveTimer = 60f;
         spawnPoints.clear();
     }
 

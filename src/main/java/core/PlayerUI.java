@@ -1,16 +1,12 @@
 package core;
 
 import arc.util.Align;
-import arc.util.Time;
 import mindustry.Vars;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
 
 public class PlayerUI {
-    private float dotTimer = 0f;
-    private int dotCount = 0;
-    private static final float DOT_INTERVAL = 0.5f;
 
     public void update() {
         for (Player p : Groups.player) {
@@ -24,15 +20,7 @@ public class PlayerUI {
     }
 
     private void updateMissionText() {
-        dotTimer += Time.delta / 60f;
-        if (dotTimer >= DOT_INTERVAL) {
-            dotTimer = 0f;
-            dotCount = (dotCount + 1) % 4;
-        }
-        String dots = ".".repeat(dotCount);
-
-        Vars.state.rules.mission = WaveSpawner.isWaveActive ? "[scarlet]In progress" + dots + "[]" : "[accent]Next wave: " + (int)WaveSpawner.firstWaveTimer + "s" + dots;
-
+        Vars.state.rules.mission = WaveSpawner.isWaveActive ? "[scarlet]In progress. Next: " + (int)WaveSpawner.waveTimer + "s" + "[]" : "[accent]Next wave: " + (int)WaveSpawner.waveTimer + "s";
         Call.setRules(Vars.state.rules);
     }
 }
