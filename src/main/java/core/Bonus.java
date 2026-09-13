@@ -58,7 +58,7 @@ public class Bonus {
                 case DISARMING -> Color.white;
                 case BLAST -> Color.red;
             };
-            Call.effect(Fx.circleColorSpark, unit.x, unit.y, 0, color, 0);
+            Call.effect(Fx.circleColorSpark, unit.x, unit.y, 0, color);
         });
     }
 
