@@ -64,6 +64,7 @@ public class WaveSpawner {
     }
 
     public void onUnitDestroyEvent(EventType.UnitDestroyEvent event) {
+        if (event.unit.team() == activeTeam) return;
         int alive = Groups.unit.count(u -> u.isValid() && !u.dead() && u.team() != activeTeam);
         if (alive == 0 && isWaveActive) {
             isWaveActive = false;
