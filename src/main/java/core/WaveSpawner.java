@@ -60,6 +60,7 @@ public class WaveSpawner {
                     ai.moveX = core.x;
                     ai.moveY = core.y;
                     ai.target(core.x, core.y, 5 * 8f, true, true);
+                    ai.shoot = true;
                     unit.controller(ai);
                 }
                 unit.health = unit.maxHealth * healthMultiplier;
