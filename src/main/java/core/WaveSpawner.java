@@ -199,7 +199,7 @@ public class WaveSpawner {
         healthMultiplier = 0.25f;
         isWaveActive = false;
         killedEnemies = 0;
-        waveTimer = 5f;
+        waveTimer = 60f;
         spawnPoints.clear();
     }
 
