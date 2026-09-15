@@ -43,6 +43,7 @@ public class Main extends Plugin {
             towerFreeze.onWorldLoadEvent();
             waveSpawner.findSpawnPoints();
             roadBorders();
+            waveSpawner.onWorldLoadEvent();
         });
         Events.on(EventType.UnitDestroyEvent.class, event -> {
             waveSpawner.onUnitDestroyEvent(event);

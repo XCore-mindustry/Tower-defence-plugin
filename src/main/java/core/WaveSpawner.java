@@ -1,23 +1,28 @@
 package core;
 
+import arc.Core;
 import arc.math.Mathf;
 import arc.math.geom.Vec2;
 import arc.struct.Seq;
+import arc.util.Log;
 import arc.util.Time;
+import arc.util.Timer;
 import mindustry.Vars;
-import mindustry.ai.types.LogicAI;
 import mindustry.content.Blocks;
 import mindustry.content.Items;
 import mindustry.content.StatusEffects;
 import mindustry.game.EventType;
 import mindustry.game.Team;
 import mindustry.gen.*;
+import mindustry.logic.LAssembler;
+import mindustry.logic.LExecutor;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
 import mindustry.type.UnitType;
 import mindustry.ui.Fonts;
 import mindustry.world.Block;
 import mindustry.world.Tile;
+import mindustry.world.blocks.logic.LogicBlock;
 import mindustry.world.blocks.storage.CoreBlock;
 
 import static core.Main.random;
@@ -54,15 +59,6 @@ public class WaveSpawner {
                 float y = point.y + Mathf.range(12f);
                 Unit unit = type.create(Team.crux);
                 unit.set(x, y);
-                CoreBlock.CoreBuild core = Team.sharded.core();
-                if (core != null) {
-                    LogicAI ai = new LogicAI();
-                    ai.moveX = core.x;
-                    ai.moveY = core.y;
-                    ai.target(core.x, core.y, 5 * 8f, true, true);
-                    ai.shoot = true;
-                    unit.controller(ai);
-                }
                 unit.health = unit.maxHealth * healthMultiplier;
                 unit.add();
             }
@@ -203,7 +199,7 @@ public class WaveSpawner {
         healthMultiplier = 0.25f;
         isWaveActive = false;
         killedEnemies = 0;
-        waveTimer = 60f;
+        waveTimer = 5f;
         spawnPoints.clear();
     }
 
@@ -232,5 +228,32 @@ public class WaveSpawner {
                 u.apply(StatusEffects.disarmed, 15f);
             }
         });
+    }
+
+    public void onWorldLoadEvent() {
+        Tile tile = Vars.world.tile(0, 0);
+        if (tile == null) return;
+        tile.setBlock(Blocks.worldProcessor, Team.crux, 0);
+        if (!(tile.build instanceof LogicBlock.LogicBuild logic)) return;
+        String code = """
+                setrate 10000
+                fetch unitCount uc @crux 0 Block
+                jump 4 lessThanEq i uc
+                set i -1
+                op add i i 1
+                fetch unit obj @crux i Block
+                jump 1 equal obj null
+                sensor x obj @x
+                sensor y obj @y
+                ubind obj
+                ulocate building core true @copper xcore ycore found core
+                ucontrol pathfind xcore ycore 0 0 0
+                op sub dx x xcore
+                op sub dy y ycore
+                op len d dx dy
+                jump 1 greaterThan d 10
+                ucontrol target xcore ycore 1 0 0
+                """;
+        logic.updateCode(code);
     }
 }
