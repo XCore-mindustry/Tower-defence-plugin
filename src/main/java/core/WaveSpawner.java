@@ -5,6 +5,7 @@ import arc.math.geom.Vec2;
 import arc.struct.Seq;
 import arc.util.Time;
 import mindustry.Vars;
+import mindustry.ai.types.LogicAI;
 import mindustry.content.Blocks;
 import mindustry.content.Items;
 import mindustry.content.StatusEffects;
@@ -38,7 +39,7 @@ public class WaveSpawner {
     public void spawnWave() {
         if (spawnPoints.isEmpty()) return;
 
-        healthMultiplier = 0.25f * Mathf.pow(1.06f, currentWave);
+        healthMultiplier = 0.25f * Mathf.pow(1.02f, currentWave);
 
         int unitCount = Mathf.random(5 + currentWave / 2, 10 + currentWave / 2);
         if (unitCount > 100) unitCount = Mathf.random(75, 100);
@@ -53,7 +54,14 @@ public class WaveSpawner {
                 float y = point.y + Mathf.range(12f);
                 Unit unit = type.create(Team.crux);
                 unit.set(x, y);
-                unit.controller(type.aiController.get());
+                CoreBlock.CoreBuild core = Team.sharded.core();
+                if (core != null) {
+                    LogicAI ai = new LogicAI();
+                    ai.moveX = core.x;
+                    ai.moveY = core.y;
+                    ai.target(core.x, core.y, 5 * 8f, true, true);
+                    unit.controller(ai);
+                }
                 unit.health = unit.maxHealth * healthMultiplier;
                 unit.add();
             }
