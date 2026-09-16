@@ -14,7 +14,7 @@ public class Types {
             UnitTypes.elude,
             UnitTypes.merui,
             UnitTypes.stell,
-            UnitTypes.alpha
+            UnitTypes.flare
     );
 
     public static Seq<UnitType> tier2Units = Seq.with(
@@ -24,8 +24,6 @@ public class Types {
             UnitTypes.atrax,
             UnitTypes.cleroi,
             UnitTypes.locus,
-            UnitTypes.poly,
-            UnitTypes.beta,
             UnitTypes.avert
     );
 
@@ -37,7 +35,6 @@ public class Types {
             UnitTypes.precept,
             UnitTypes.mega,
             UnitTypes.zenith,
-            UnitTypes.gamma,
             UnitTypes.obviate
     );
 

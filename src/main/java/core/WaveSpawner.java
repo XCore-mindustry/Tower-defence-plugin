@@ -14,8 +14,6 @@ import mindustry.content.StatusEffects;
 import mindustry.game.EventType;
 import mindustry.game.Team;
 import mindustry.gen.*;
-import mindustry.logic.LAssembler;
-import mindustry.logic.LExecutor;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
 import mindustry.type.UnitType;
@@ -44,7 +42,7 @@ public class WaveSpawner {
     public void spawnWave() {
         if (spawnPoints.isEmpty()) return;
 
-        healthMultiplier = 0.25f * Mathf.pow(1.02f, currentWave);
+        healthMultiplier = 0.25f * Mathf.pow(1.04f, currentWave);
 
         int unitCount = Mathf.random(5 + currentWave / 2, 10 + currentWave / 2);
         if (unitCount > 100) unitCount = Mathf.random(75, 100);
@@ -230,10 +228,9 @@ public class WaveSpawner {
         });
     }
 
-    public void onWorldLoadEvent() {
+    public void placeProc() {
         Tile tile = Vars.world.tile(0, 0);
-        if (tile == null) return;
-        tile.setBlock(Blocks.worldProcessor, Team.crux, 0);
+        tile.setNet(Blocks.worldProcessor, Team.crux, 0);
         if (!(tile.build instanceof LogicBlock.LogicBuild logic)) return;
         String code = """
                 setrate 10000

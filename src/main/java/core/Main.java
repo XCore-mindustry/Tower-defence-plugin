@@ -27,9 +27,9 @@ public class Main extends Plugin {
     public void init() {
         Log.info("tower-defence-plugin loaded.");
 
+
         Timer.schedule(ui::update, 0f, 1f);
         Timer.schedule(base::update, 0f, 0.2f);
-
 
         Events.run(EventType.Trigger.update, this::update);
         Events.on(EventType.BlockBuildEndEvent.class, towerFreeze::onBlockBuildEndEvent);
@@ -43,7 +43,7 @@ public class Main extends Plugin {
             towerFreeze.onWorldLoadEvent();
             waveSpawner.findSpawnPoints();
             roadBorders();
-            waveSpawner.onWorldLoadEvent();
+            waveSpawner.placeProc();
         });
         Events.on(EventType.UnitDestroyEvent.class, event -> {
             waveSpawner.onUnitDestroyEvent(event);
