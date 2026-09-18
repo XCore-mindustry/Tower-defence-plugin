@@ -67,6 +67,7 @@ public class WaveSpawner {
                 Unit unit = type.create(Team.crux);
                 unit.set(x, y);
                 unit.health = unit.maxHealth * healthMultiplier;
+                unit.controller(new TdAI());
                 unit.add();
             }
         }
@@ -244,30 +245,10 @@ public class WaveSpawner {
         });
     }
 
-    public void placeProc() {
+    public void cleanupProc() {
         Tile tile = Vars.world.tile(0, 0);
-        if (tile == null) return;
-        tile.setNet(Blocks.worldProcessor, Team.crux, 0);
-        if (!(tile.build instanceof LogicBlock.LogicBuild logic)) return;
-        String code = """
-                setrate 10000
-                fetch unitCount uc @crux 0 Block
-                jump 4 lessThanEq i uc
-                set i -1
-                op add i i 1
-                fetch unit obj @crux i Block
-                jump 1 equal obj null
-                sensor x obj @x
-                sensor y obj @y
-                ubind obj
-                ulocate building core true @copper xcore ycore found core
-                ucontrol pathfind xcore ycore 0 0 0
-                op sub dx x xcore
-                op sub dy y ycore
-                op len d dx dy
-                jump 1 greaterThan d 10
-                ucontrol target xcore ycore 1 0 0
-                """;
-        logic.updateCode(code);
+        if (tile != null && tile.block() == Blocks.worldProcessor && tile.team() == Team.crux) {
+            tile.setNet(Blocks.air);
+        }
     }
 }

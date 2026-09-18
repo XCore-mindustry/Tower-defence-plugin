@@ -7,6 +7,8 @@ import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.ctype.ContentType;
 import mindustry.game.EventType;
+import mindustry.game.Team;
+import mindustry.gen.Groups;
 import mindustry.mod.Plugin;
 import mindustry.world.Block;
 import mindustry.world.Tile;
@@ -54,7 +56,22 @@ public class Main extends Plugin {
             turrets.onWorldLoadEvent();
             waveSpawner.findSpawnPoints();
             roadBorders();
-            waveSpawner.placeProc();
+            waveSpawner.cleanupProc();
+            Groups.unit.each(u -> {
+                if (u.team == Team.crux && !(u.controller() instanceof TdAI)) {
+                    u.controller(new TdAI());
+                }
+            });
+        });
+        Events.on(EventType.UnitSpawnEvent.class, e -> {
+            if (e.unit != null && e.unit.team == Team.crux && !(e.unit.controller() instanceof TdAI)) {
+                e.unit.controller(new TdAI());
+            }
+        });
+        Events.on(EventType.UnitCreateEvent.class, e -> {
+            if (e.unit != null && e.unit.team == Team.crux && !(e.unit.controller() instanceof TdAI)) {
+                e.unit.controller(new TdAI());
+            }
         });
         Events.on(EventType.UnitDestroyEvent.class, event -> {
             waveSpawner.onUnitDestroyEvent(event);
