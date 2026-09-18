@@ -25,9 +25,8 @@ public class Main extends Plugin {
     public final Bonus bonus = new Bonus();
 
     public void init() {
-        Log.info("tower-defence-plugin loaded.");
+        Log.info("tower-defence-plugin loaded. uilabel");
 
-        // Periodic timers instead of running everything on the 60 TPS game tick
         Timer.schedule(ui::update, 0f, 1f);
         Timer.schedule(base::update, 0f, 0.5f);
         Timer.schedule(turrets::update, 0f, 0.5f);

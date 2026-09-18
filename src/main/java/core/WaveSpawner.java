@@ -250,17 +250,23 @@ public class WaveSpawner {
         tile.setNet(Blocks.worldProcessor, Team.crux, 0);
         if (!(tile.build instanceof LogicBlock.LogicBuild logic)) return;
         String code = """
-                setrate 1000
-                ulocate building core true @copper xcore ycore found core
-                jump 1 equal found false
+                setrate 10000
                 fetch unitCount uc @crux 0 Block
-                jump 6 lessThanEq i uc
+                jump 4 lessThanEq i uc
                 set i -1
                 op add i i 1
                 fetch unit obj @crux i Block
-                jump 3 equal obj null
+                jump 1 equal obj null
+                sensor x obj @x
+                sensor y obj @y
                 ubind obj
+                ulocate building core true @copper xcore ycore found core
                 ucontrol pathfind xcore ycore 0 0 0
+                op sub dx x xcore
+                op sub dy y ycore
+                op len d dx dy
+                jump 1 greaterThan d 10
+                ucontrol target xcore ycore 1 0 0
                 """;
         logic.updateCode(code);
     }
