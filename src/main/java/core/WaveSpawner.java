@@ -66,6 +66,7 @@ public class WaveSpawner {
                 float y = point.y + Mathf.range(12f);
                 Unit unit = type.create(Team.crux);
                 unit.set(x, y);
+                unit.elevation = 0f;
                 unit.health = unit.maxHealth * healthMultiplier;
                 unit.controller(new TdAI());
                 unit.add();

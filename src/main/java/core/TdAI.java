@@ -24,15 +24,15 @@ public class TdAI extends AIController {
         Building core = getTargetCore();
         if (core == null) return;
 
-        if (unit.isFlying()) {
-            moveTo(core, 0f, 30f);
-        } else {
-            float touchRadius = core.block.size * Vars.tilesize / 2f + unit.hitSize / 2f;
-            if (!unit.within(core, touchRadius)) {
-                var result = Vars.controlPath.getPathPosition(unit, Tmp.v2.set(core.x, core.y));
-                if (result.move) {
-                    moveTo(result.dest, 1f, Tmp.v2.epsilonEquals(result.dest, 4.1f) ? 30f : 0f);
-                }
+        if (unit.elevation > 0f) {
+            unit.elevation = 0f;
+        }
+
+        float touchRadius = core.block.size * Vars.tilesize / 2f + unit.hitSize / 2f;
+        if (!unit.within(core, touchRadius)) {
+            var result = Vars.controlPath.getPathPosition(unit, Tmp.v2.set(core.x, core.y));
+            if (result.move) {
+                moveTo(result.dest, 1f, Tmp.v2.epsilonEquals(result.dest, 4.1f) ? 30f : 0f);
             }
         }
 
