@@ -38,6 +38,8 @@ public class Bonus {
     }
 
     public void update() {
+        if (Vars.state == null || Vars.state.isPaused() || Groups.player.isEmpty()) return;
+
         timer -= Time.delta / 60f;
         if (timer <= 0) {
             Unit randomUnit = getRandomUnit();
@@ -48,8 +50,19 @@ public class Bonus {
             timer = minInterval + random.nextFloat() * (maxInterval - minInterval);
         }
 
+        // Periodically prune dead units to prevent memory leak
+        markedUnits.keys().toSeq().each(u -> {
+            if (u == null || !u.isValid() || u.dead()) {
+                markedUnits.remove(u);
+            }
+        });
+    }
+
+    public void updateVisuals() {
+        if (markedUnits.isEmpty() || Groups.player.isEmpty() || Vars.state == null || Vars.state.isPaused()) return;
+
         markedUnits.each((unit, bonus) -> {
-            if (!unit.isValid() || unit.dead()) return;
+            if (unit == null || !unit.isValid() || unit.dead()) return;
             Color color = switch (bonus) {
                 case FREEZE -> Color.cyan;
                 case STUN -> Color.yellow;

@@ -1,12 +1,9 @@
 package core;
 
-import arc.Core;
 import arc.math.Mathf;
 import arc.math.geom.Vec2;
 import arc.struct.Seq;
-import arc.util.Log;
 import arc.util.Time;
-import arc.util.Timer;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.content.Items;
@@ -27,6 +24,8 @@ import static core.Main.random;
 import static core.Types.*;
 
 public class WaveSpawner {
+    public static final int MAX_ENEMIES_CAP = 350;
+
     public static int currentWave = 0;
     public static int waveInterval = 30;
     public static float healthMultiplier = 0.25f;
@@ -39,8 +38,18 @@ public class WaveSpawner {
     public static Seq<Vec2> spawnPoints = new Seq<>();
     public static Seq<CoreBlock.CoreBuild> cores = new Seq<>();
 
+    public static int countAliveEnemies() {
+        return Groups.unit.count(u -> u.isValid() && !u.dead() && u.team != activeTeam);
+    }
+
     public void spawnWave() {
         if (spawnPoints.isEmpty()) return;
+
+        int aliveEnemies = countAliveEnemies();
+        if (aliveEnemies >= MAX_ENEMIES_CAP) {
+            waveTimer = 5f;
+            return;
+        }
 
         healthMultiplier = 0.25f * Mathf.pow(1.04f, currentWave);
 
@@ -68,7 +77,7 @@ public class WaveSpawner {
 
     public void onUnitDestroyEvent(EventType.UnitDestroyEvent event) {
         if (event.unit.team() == activeTeam) return;
-        int alive = Groups.unit.count(u -> u.isValid() && !u.dead() && u.team() != activeTeam);
+        int alive = countAliveEnemies();
         if (alive == 0 && isWaveActive) {
             isWaveActive = false;
             if (waveTimer > 5) waveTimer = 5;
@@ -185,6 +194,10 @@ public class WaveSpawner {
     }
 
     public void update() {
+        if (Vars.state == null || !Vars.state.isPlaying() || Vars.state.isPaused() || Groups.player.isEmpty()) {
+            return;
+        }
+
         waveTimer -= Time.delta / 60f;
         if (waveTimer <= 0f) {
             spawnWave();
@@ -211,45 +224,43 @@ public class WaveSpawner {
     }
 
     public void updateDisarm() {
+        if (cores.isEmpty() || Groups.player.isEmpty() || Vars.state == null || Vars.state.isPaused()) return;
+        cores.removeAll(c -> c == null || !c.isValid());
         if (cores.isEmpty()) return;
-        Groups.unit.each(u -> {
-            if (u.team() == activeTeam) return;
-            if (!u.isValid() || u.dead()) return;
 
-            float best = Float.MAX_VALUE;
-            for (var c : cores) {
-                if (c == null || !c.isValid()) continue;
-                float d = u.dst(c);
-                if (d < best) best = d;
+        float thresholdDst2 = (15f * Vars.tilesize) * (15f * Vars.tilesize);
+        Groups.unit.each(u -> {
+            if (u.team == activeTeam || !u.isValid() || u.dead()) return;
+
+            float best2 = Float.MAX_VALUE;
+            for (int i = 0; i < cores.size; i++) {
+                var c = cores.get(i);
+                float d2 = u.dst2(c);
+                if (d2 < best2) best2 = d2;
             }
-            if (best > 15f * Vars.tilesize) {
-                u.apply(StatusEffects.disarmed, 15f);
+            if (best2 > thresholdDst2) {
+                u.apply(StatusEffects.disarmed, 25f);
             }
         });
     }
 
     public void placeProc() {
         Tile tile = Vars.world.tile(0, 0);
+        if (tile == null) return;
         tile.setNet(Blocks.worldProcessor, Team.crux, 0);
         if (!(tile.build instanceof LogicBlock.LogicBuild logic)) return;
         String code = """
-                setrate 10000
+                setrate 1000
+                ulocate building core true @copper xcore ycore found core
+                jump 1 equal found false
                 fetch unitCount uc @crux 0 Block
-                jump 4 lessThanEq i uc
+                jump 6 lessThanEq i uc
                 set i -1
                 op add i i 1
                 fetch unit obj @crux i Block
-                jump 1 equal obj null
-                sensor x obj @x
-                sensor y obj @y
+                jump 3 equal obj null
                 ubind obj
-                ulocate building core true @copper xcore ycore found core
                 ucontrol pathfind xcore ycore 0 0 0
-                op sub dx x xcore
-                op sub dy y ycore
-                op len d dx dy
-                jump 1 greaterThan d 10
-                ucontrol target xcore ycore 1 0 0
                 """;
         logic.updateCode(code);
     }

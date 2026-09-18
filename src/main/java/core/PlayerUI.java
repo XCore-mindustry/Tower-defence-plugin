@@ -7,8 +7,11 @@ import mindustry.gen.Groups;
 import mindustry.gen.Player;
 
 public class PlayerUI {
+    private String lastMission = "";
 
     public void update() {
+        if (Groups.player.isEmpty() || Vars.state == null || Vars.state.isPaused()) return;
+
         for (Player p : Groups.player) {
             String uiLabel = "[grey]\uE80EX[gold]Core [grey]>[] [scarlet]Tower| ⚔ |Defence[lightgrey]\n\n" +
                     "[white]Current wave: [accent]" + WaveSpawner.currentWave + "\n" +
@@ -20,7 +23,13 @@ public class PlayerUI {
     }
 
     private void updateMissionText() {
-        Vars.state.rules.mission = WaveSpawner.isWaveActive ? "[scarlet]In progress. Next: " + (int)WaveSpawner.waveTimer + "s" + "[]" : "[accent]Next wave: " + (int)WaveSpawner.waveTimer + "s";
-        Call.setRules(Vars.state.rules);
+        String newMission = WaveSpawner.isWaveActive
+                ? "[scarlet]In progress. Next: " + (int)WaveSpawner.waveTimer + "s[]"
+                : "[accent]Next wave: " + (int)WaveSpawner.waveTimer + "s";
+        if (!newMission.equals(lastMission)) {
+            lastMission = newMission;
+            Vars.state.rules.mission = newMission;
+            Call.setRules(Vars.state.rules);
+        }
     }
 }

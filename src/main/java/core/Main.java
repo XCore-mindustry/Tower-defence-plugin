@@ -27,13 +27,24 @@ public class Main extends Plugin {
     public void init() {
         Log.info("tower-defence-plugin loaded.");
 
-
+        // Periodic timers instead of running everything on the 60 TPS game tick
         Timer.schedule(ui::update, 0f, 1f);
-        Timer.schedule(base::update, 0f, 0.2f);
+        Timer.schedule(base::update, 0f, 0.5f);
+        Timer.schedule(turrets::update, 0f, 0.5f);
+        Timer.schedule(towerFreeze::update, 0f, 0.25f);
+        Timer.schedule(waveSpawner::updateDisarm, 0f, 0.25f);
+        Timer.schedule(bonus::updateVisuals, 0f, 0.2f);
 
         Events.run(EventType.Trigger.update, this::update);
-        Events.on(EventType.BlockBuildEndEvent.class, towerFreeze::onBlockBuildEndEvent);
-        Events.on(EventType.BlockDestroyEvent.class, towerFreeze::onBlockDestroyEvent);
+
+        Events.on(EventType.BlockBuildEndEvent.class, e -> {
+            towerFreeze.onBlockBuildEndEvent(e);
+            turrets.onBlockBuildEndEvent(e);
+        });
+        Events.on(EventType.BlockDestroyEvent.class, e -> {
+            towerFreeze.onBlockDestroyEvent(e);
+            turrets.onBlockDestroyEvent(e);
+        });
         Events.on(EventType.WorldLoadEvent.class, e -> {
             load();
             waveSpawner.reset();
@@ -41,6 +52,7 @@ public class Main extends Plugin {
             bonus.reset();
             waveSpawner.findCores();
             towerFreeze.onWorldLoadEvent();
+            turrets.onWorldLoadEvent();
             waveSpawner.findSpawnPoints();
             roadBorders();
             waveSpawner.placeProc();
@@ -55,9 +67,6 @@ public class Main extends Plugin {
 
     public void update() {
         waveSpawner.update();
-        towerFreeze.update();
-        waveSpawner.updateDisarm();
-        turrets.update();
         bonus.update();
     }
 

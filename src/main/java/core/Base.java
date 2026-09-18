@@ -1,12 +1,11 @@
 package core;
 
-import arc.Events;
+import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.game.EventType;
 import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
-import mindustry.world.blocks.storage.CoreBlock;
 
 public class Base {
     public float health = 25000f;
@@ -24,11 +23,13 @@ public class Base {
     }
 
     public void update() {
-        Groups.build.each(b -> {
-            if (Types.cores.contains(b.block) && b.team == WaveSpawner.activeTeam && b.isValid()) {
-                Call.label("[pink]" + (int)health + "♡", 0.2f, b.x, b.y);
+        if (Groups.player.isEmpty() || Vars.state == null || Vars.state.isPaused()) return;
+        for (int i = 0; i < WaveSpawner.cores.size; i++) {
+            var b = WaveSpawner.cores.get(i);
+            if (b != null && b.isValid() && b.team == WaveSpawner.activeTeam) {
+                Call.label("[pink]" + (int)health + "♡", 0.5f, b.x, b.y);
             }
-        });
+        }
     }
 
     public void reset() {
@@ -36,10 +37,11 @@ public class Base {
     }
 
     public void gameOver() {
-        Groups.build.each(b -> {
-            if (b instanceof CoreBlock.CoreBuild && b.team == Team.sharded) {
+        for (int i = 0; i < WaveSpawner.cores.size; i++) {
+            var b = WaveSpawner.cores.get(i);
+            if (b != null && b.isValid() && b.team == Team.sharded) {
                 b.tile.setNet(Blocks.air);
             }
-        });
+        }
     }
 }

@@ -19,6 +19,17 @@ repositories {
 dependencies {
     compileOnly "com.github.Anuken.Mindustry:core:v160"
     compileOnly "com.github.Anuken.Arc:arc-core:v160"
+
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.assertj:assertj-core:3.25.3'
+    testImplementation "com.github.Anuken.Mindustry:core:v160"
+    testImplementation "com.github.Anuken.Arc:arc-core:v160"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 jar {
@@ -29,14 +40,3 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
-tasks.register('cleanTargetDir', Delete) {
-    delete "C:/Games/Mindustry/server/config/mods/tower-defence-plugin.jar"
-}
-
-tasks.register('deployJar', Copy) {
-    dependsOn jar
-    from jar.archiveFile
-    into "C:/Games/Mindustry/server/config/mods"
-}
-
-jar.finalizedBy(deployJar)
