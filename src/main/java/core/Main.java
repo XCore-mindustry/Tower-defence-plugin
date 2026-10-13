@@ -25,9 +25,11 @@ public class Main extends Plugin {
     public static Random random = new Random();
     public final Turrets turrets = new Turrets();
     public final Bonus bonus = new Bonus();
+    private RoadPathfinder roadPathfinder;
 
     public void init() {
         Log.info("tower-defence-plugin loaded. uilabel");
+        roadPathfinder = RoadPathfinder.install();
 
         Timer.schedule(ui::update, 0f, 1f);
         Timer.schedule(base::update, 0f, 0.5f);
@@ -87,6 +89,9 @@ public class Main extends Plugin {
     }
 
     public void roadBorders() {
+        // Spawn-marked floor types now guide enemies without placing border walls.
+        // Keep support for legacy maps that do not mark a road floor at a spawn.
+        if (roadPathfinder != null && roadPathfinder.hasRoadFloors()) return;
         Block target = Vars.content.getByName(ContentType.block, "metal-wall-2");
         if (target == null) return;
         for (Tile tile : Vars.world.tiles) {
