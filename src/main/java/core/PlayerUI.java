@@ -17,7 +17,8 @@ public class PlayerUI {
                     "[white]Current wave: [accent]" + WaveSpawner.currentWave + "\n" +
                     "[white]Health multiplier: [orange]" + WaveSpawner.healthMultiplier + "\n" +
                     "[white]Kills: [red]" + WaveSpawner.killedEnemies;
-            Call.infoPopup(p.con, uiLabel, 1f, Align.topLeft, 200, 0, 0, 0);
+            // Same id replaces the popup in place; twice the 1s refresh so a lost packet leaves no gap.
+            Call.infoPopup(p.con, uiLabel, "td-ui", 2f, Align.topLeft, 200, 0, 0, 0);
         }
         updateMissionText();
     }
