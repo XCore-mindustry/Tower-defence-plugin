@@ -27,7 +27,8 @@ public class Base {
         for (int i = 0; i < WaveSpawner.cores.size; i++) {
             var b = WaveSpawner.cores.get(i);
             if (b != null && b.isValid() && b.team == WaveSpawner.activeTeam) {
-                Call.label("[pink]" + (int)health + "♡", 0.5f, b.x, b.y);
+                // One label per core, updated in place every 0.5s.
+                Call.label("[pink]" + (int)health + "♡", b.pos(), 1f, b.x, b.y);
             }
         }
     }
