@@ -3,6 +3,7 @@ package core;
 import arc.Events;
 import arc.util.Log;
 import arc.util.Timer;
+import core.towerGetter.TowerGetter;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.ctype.ContentType;
@@ -18,13 +19,15 @@ import java.util.Random;
 import static core.DpContent.load;
 
 public class Main extends Plugin {
-    public final WaveSpawner waveSpawner = new WaveSpawner();
+    public final TowerGetter towerGetter = new TowerGetter();
+    public final WaveSpawner waveSpawner = new WaveSpawner(towerGetter);
     public final TowerFreeze towerFreeze = new TowerFreeze();
     public final Base base = new Base();
     public final PlayerUI ui = new PlayerUI();
     public static Random random = new Random();
     public final Turrets turrets = new Turrets();
     public final Bonus bonus = new Bonus();
+
     private RoadPathfinder roadPathfinder;
 
     public void init() {
@@ -40,17 +43,25 @@ public class Main extends Plugin {
 
         Events.run(EventType.Trigger.update, this::update);
 
+        Events.on(EventType.BlockBuildBeginEvent.class, event -> {
+            DpContent.onBlockBuildBeginEvent(event, towerGetter);
+        });
+
         Events.on(EventType.BlockBuildEndEvent.class, e -> {
             towerFreeze.onBlockBuildEndEvent(e);
             turrets.onBlockBuildEndEvent(e);
         });
+
         Events.on(EventType.BlockDestroyEvent.class, e -> {
             towerFreeze.onBlockDestroyEvent(e);
             turrets.onBlockDestroyEvent(e);
         });
+
         Events.on(EventType.WorldLoadEvent.class, e -> {
             load();
             waveSpawner.reset();
+            towerGetter.onWorldLoad();
+
             base.reset();
             bonus.reset();
             waveSpawner.findCores();
@@ -59,28 +70,36 @@ public class Main extends Plugin {
             waveSpawner.findSpawnPoints();
             roadBorders();
             waveSpawner.cleanupProc();
+
             Groups.unit.each(u -> {
                 if (u.team == Team.crux && !(u.controller() instanceof TdAI)) {
                     u.controller(new TdAI());
                 }
             });
         });
+
+        Events.on(EventType.PlayerJoin.class, e -> {
+            towerGetter.onPlayerJoin(e.player);
+        });
+
         Events.on(EventType.UnitSpawnEvent.class, e -> {
             if (e.unit != null && e.unit.team == Team.crux && !(e.unit.controller() instanceof TdAI)) {
                 e.unit.controller(new TdAI());
             }
         });
+
         Events.on(EventType.UnitCreateEvent.class, e -> {
             if (e.unit != null && e.unit.team == Team.crux && !(e.unit.controller() instanceof TdAI)) {
                 e.unit.controller(new TdAI());
             }
         });
+
         Events.on(EventType.UnitDestroyEvent.class, event -> {
             waveSpawner.onUnitDestroyEvent(event);
             bonus.onUnitDestroyEvent(event);
         });
+
         Events.on(EventType.BuildDamageEvent.class, base::onBuildDamageEvent);
-        Events.on(EventType.BlockBuildBeginEvent.class, DpContent::onBlockBuildBeginEvent);
     }
 
     public void update() {
@@ -89,13 +108,14 @@ public class Main extends Plugin {
     }
 
     public void roadBorders() {
-        // Spawn-marked floor types now guide enemies without placing border walls.
-        // Keep support for legacy maps that do not mark a road floor at a spawn.
         if (roadPathfinder != null && roadPathfinder.hasRoadFloors()) return;
+
         Block target = Vars.content.getByName(ContentType.block, "metal-wall-2");
         if (target == null) return;
+
         for (Tile tile : Vars.world.tiles) {
             if (tile == null) continue;
+
             if (tile.block() == target) {
                 tile.setFloor(Blocks.empty.asFloor());
                 tile.setBlock(DpContent.dpRoadWall, WaveSpawner.activeTeam);

@@ -1,9 +1,12 @@
 package core;
 
+import core.towerGetter.TowerGetter;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.ctype.ContentType;
 import mindustry.game.EventType;
+import mindustry.gen.Groups;
+import mindustry.gen.Player;
 import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.blocks.ConstructBlock;
@@ -18,11 +21,16 @@ public class DpContent {
         dpGauss = Vars.content.getByName(ContentType.block, "dp-gauss");
     }
 
-    public static void onBlockBuildBeginEvent(EventType.BlockBuildBeginEvent event) {
-        if (!event.breaking) return;
+    public static void onBlockBuildBeginEvent(EventType.BlockBuildBeginEvent event, TowerGetter towerGetter) {
         if (!(event.tile.build instanceof ConstructBlock.ConstructBuild build)) return;
-        if (build.current != dpRoadWall) return;
-        event.tile.setNet(dpRoadWall, event.team, 0);
+
+        Player player = Groups.player.find(p -> p.unit() == event.unit);
+
+        if (player == null) return;
+
+        if (towerGetter.isLocked(build.current.name, player)) {
+            event.tile.setNet(build.previous, event.team, build.rotation);
+        }
     }
 
     public static void onPickupEvent(EventType.PickupEvent event) {

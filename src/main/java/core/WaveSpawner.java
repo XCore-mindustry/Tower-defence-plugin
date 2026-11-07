@@ -4,6 +4,7 @@ import arc.math.Mathf;
 import arc.math.geom.Vec2;
 import arc.struct.Seq;
 import arc.util.Time;
+import core.towerGetter.TowerGetter;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.content.Items;
@@ -17,7 +18,6 @@ import mindustry.type.UnitType;
 import mindustry.ui.Fonts;
 import mindustry.world.Block;
 import mindustry.world.Tile;
-import mindustry.world.blocks.logic.LogicBlock;
 import mindustry.world.blocks.storage.CoreBlock;
 
 import static core.Main.random;
@@ -38,6 +38,12 @@ public class WaveSpawner {
     public static Seq<Vec2> spawnPoints = new Seq<>();
     public static Seq<CoreBlock.CoreBuild> cores = new Seq<>();
 
+    private final TowerGetter towerGetter;
+
+    public WaveSpawner(TowerGetter towerGetter) {
+        this.towerGetter = towerGetter;
+    }
+
     public static int countAliveEnemies() {
         return Groups.unit.count(u -> u.isValid() && !u.dead() && u.team != activeTeam);
     }
@@ -46,6 +52,7 @@ public class WaveSpawner {
         if (spawnPoints.isEmpty()) return;
 
         int aliveEnemies = countAliveEnemies();
+
         if (aliveEnemies >= MAX_ENEMIES_CAP) {
             waveTimer = 5f;
             return;
@@ -54,7 +61,9 @@ public class WaveSpawner {
         healthMultiplier = 0.25f * Mathf.pow(1.0525f, currentWave);
 
         int unitCount = Mathf.random(5 + currentWave / 2, 10 + currentWave / 2);
+
         if (unitCount > 75) unitCount = Mathf.random(75, 100);
+
         int[] tiers = generateTiers(unitCount, currentWave);
 
         Seq<Integer> availableTiers = new Seq<>();
@@ -68,6 +77,7 @@ public class WaveSpawner {
         if (availableTiers.isEmpty()) return;
 
         availableTiers.shuffle();
+
         int typeCount = Mathf.random(1, Math.min(3, availableTiers.size));
 
         Seq<UnitType> waveUnits = new Seq<>();
@@ -81,6 +91,7 @@ public class WaveSpawner {
         }
 
         if (waveUnits.isEmpty()) return;
+
         for (Vec2 point : spawnPoints) {
             for (int i = 0; i < unitCount; i++) {
                 UnitType type = waveUnits.random();
@@ -103,15 +114,25 @@ public class WaveSpawner {
 
     public void onUnitDestroyEvent(EventType.UnitDestroyEvent event) {
         if (event.unit.team() == activeTeam) return;
+
         int alive = countAliveEnemies();
+
         if (alive == 0 && isWaveActive) {
             isWaveActive = false;
+
             if (waveTimer > 5) waveTimer = 5;
+
+            towerGetter.onWaveCleared(currentWave);
         }
+
         Seq<ItemStack> loot = new Seq<>(getLootForEnemy(currentWave));
+
         if (Team.sharded.core() != null) {
-            for (ItemStack s : loot) Team.sharded.core().items.add(s.item, s.amount);
+            for (ItemStack s : loot) {
+                Team.sharded.core().items.add(s.item, s.amount);
+            }
         }
+
         Call.label(toText(loot), 1f, event.unit.x, event.unit.y + 10);
         killedEnemies++;
     }
@@ -127,24 +148,30 @@ public class WaveSpawner {
             available.add(Items.graphite);
             available.add(Items.metaglass);
         }
+
         if (wave >= 30) {
             available.add(Items.silicon);
             available.add(Items.titanium);
         }
+
         if (wave >= 45) {
             available.add(Items.plastanium);
             available.add(Items.phaseFabric);
         }
+
         if (wave >= 60) {
             available.add(Items.thorium);
             available.add(Items.surgeAlloy);
         }
 
         int typesCount = Mathf.random(1, Math.min(3, available.size));
+
         available.shuffle();
+
         for (int i = 0; i < typesCount; i++) {
             Item item = available.get(i);
             int amount = Mathf.random(10, 50);
+
             loot.add(new ItemStack(item, amount));
         }
 
@@ -172,6 +199,7 @@ public class WaveSpawner {
         float base5 = wave >= 80 ? (wave - 80) * 0.5f + 2f : 0f;
 
         float sum = base1 + base2 + base3 + base4 + base5;
+
         probs[0] = base1 / sum;
         probs[1] = base2 / sum;
         probs[2] = base3 / sum;
@@ -181,19 +209,23 @@ public class WaveSpawner {
         for (int i = 0; i < count; i++) {
             float r = random.nextFloat();
             float cumulative = 0;
+
             for (int t = 0; t < 5; t++) {
                 cumulative += probs[t];
+
                 if (r < cumulative) {
                     tiers[i] = t + 1;
                     break;
                 }
             }
         }
+
         return tiers;
     }
 
     public void findSpawnPoints() {
         spawnPoints.clear();
+
         if (spawnBlock == null) {
             for (Block b : Vars.content.blocks()) {
                 if (b instanceof mindustry.world.blocks.environment.SpawnBlock) {
@@ -202,7 +234,9 @@ public class WaveSpawner {
                 }
             }
         }
+
         if (spawnBlock == null) return;
+
         for (Tile tile : Vars.world.tiles) {
             if (tile != null && tile.overlay() == spawnBlock) {
                 spawnPoints.add(new Vec2(tile.worldx(), tile.worldy()));
@@ -212,10 +246,12 @@ public class WaveSpawner {
 
     public String toText(Seq<ItemStack> loot) {
         StringBuilder sb = new StringBuilder();
+
         for (ItemStack stack : loot) {
             String icon = Fonts.getUnicodeStr(stack.item.name);
             sb.append(icon).append(stack.amount).append(" ");
         }
+
         return sb.toString();
     }
 
@@ -225,6 +261,7 @@ public class WaveSpawner {
         }
 
         waveTimer -= Time.delta / 60f;
+
         if (waveTimer <= 0f) {
             spawnWave();
             waveTimer = waveInterval;
@@ -242,6 +279,7 @@ public class WaveSpawner {
 
     public void findCores() {
         cores.clear();
+
         Groups.build.each(b -> {
             if (b instanceof CoreBlock.CoreBuild cb && b.team == Team.sharded) {
                 cores.add(cb);
@@ -251,19 +289,25 @@ public class WaveSpawner {
 
     public void updateDisarm() {
         if (cores.isEmpty() || Groups.player.isEmpty() || Vars.state == null || Vars.state.isPaused()) return;
+
         cores.removeAll(c -> c == null || !c.isValid());
+
         if (cores.isEmpty()) return;
 
         float thresholdDst2 = (15f * Vars.tilesize) * (15f * Vars.tilesize);
+
         Groups.unit.each(u -> {
             if (u.team == activeTeam || !u.isValid() || u.dead()) return;
 
             float best2 = Float.MAX_VALUE;
+
             for (int i = 0; i < cores.size; i++) {
                 var c = cores.get(i);
                 float d2 = u.dst2(c);
+
                 if (d2 < best2) best2 = d2;
             }
+
             if (best2 > thresholdDst2) {
                 u.apply(StatusEffects.disarmed, 25f);
             }
@@ -272,6 +316,7 @@ public class WaveSpawner {
 
     public void cleanupProc() {
         Tile tile = Vars.world.tile(0, 0);
+
         if (tile != null && tile.block() == Blocks.worldProcessor && tile.team() == Team.crux) {
             tile.setNet(Blocks.air);
         }

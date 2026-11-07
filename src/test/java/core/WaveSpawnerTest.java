@@ -2,6 +2,7 @@ package core;
 
 import arc.math.geom.Vec2;
 import arc.struct.Seq;
+import core.towerGetter.TowerGetter;
 import mindustry.Vars;
 import mindustry.core.GameState;
 import mindustry.game.Team;
@@ -19,7 +20,8 @@ class WaveSpawnerTest {
 
     @BeforeEach
     void setUp() {
-        waveSpawner = new WaveSpawner();
+        TowerGetter tg = new TowerGetter();
+        waveSpawner = new WaveSpawner(tg);
         WaveSpawner.currentWave = 0;
         WaveSpawner.waveTimer = 30f;
         WaveSpawner.isWaveActive = false;
