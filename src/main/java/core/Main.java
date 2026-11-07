@@ -28,7 +28,7 @@ public class Main extends Plugin {
     private RoadPathfinder roadPathfinder;
 
     public void init() {
-        Log.info("tower-defence-plugin loaded. uilabel");
+        Log.info("tower-defence-plugin loaded.");
         roadPathfinder = RoadPathfinder.install();
 
         Timer.schedule(ui::update, 0f, 1f);

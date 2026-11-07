@@ -51,19 +51,43 @@ public class WaveSpawner {
             return;
         }
 
-        healthMultiplier = 0.25f * Mathf.pow(1.04f, currentWave);
+        healthMultiplier = 0.25f * Mathf.pow(1.0525f, currentWave);
 
         int unitCount = Mathf.random(5 + currentWave / 2, 10 + currentWave / 2);
-        if (unitCount > 100) unitCount = Mathf.random(75, 100);
-
+        if (unitCount > 75) unitCount = Mathf.random(75, 100);
         int[] tiers = generateTiers(unitCount, currentWave);
 
+        Seq<Integer> availableTiers = new Seq<>();
+
+        for (int tier : tiers) {
+            if (!availableTiers.contains(tier)) {
+                availableTiers.add(tier);
+            }
+        }
+
+        if (availableTiers.isEmpty()) return;
+
+        availableTiers.shuffle();
+        int typeCount = Mathf.random(1, Math.min(3, availableTiers.size));
+
+        Seq<UnitType> waveUnits = new Seq<>();
+
+        for (int i = 0; i < typeCount; i++) {
+            UnitType type = getUnit(availableTiers.get(i));
+
+            if (type != null && !waveUnits.contains(type, true)) {
+                waveUnits.add(type);
+            }
+        }
+
+        if (waveUnits.isEmpty()) return;
         for (Vec2 point : spawnPoints) {
-            for (int tier : tiers) {
-                UnitType type = getUnit(tier);
-                if (type == null) continue;
+            for (int i = 0; i < unitCount; i++) {
+                UnitType type = waveUnits.random();
+
                 float x = point.x + Mathf.range(12f);
                 float y = point.y + Mathf.range(12f);
+
                 Unit unit = type.create(Team.crux);
                 unit.set(x, y);
                 unit.elevation = 0f;

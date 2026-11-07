@@ -10,11 +10,12 @@ import mindustry.world.blocks.ConstructBlock;
 
 public class DpContent {
     public static Block
-    dpRoadWall
+    dpRoadWall, dpGauss
             ;
 
     public static void load() {
         dpRoadWall = Vars.content.getByName(ContentType.block, "dp-road-wall");
+        dpGauss = Vars.content.getByName(ContentType.block, "dp-gauss");
     }
 
     public static void onBlockBuildBeginEvent(EventType.BlockBuildBeginEvent event) {

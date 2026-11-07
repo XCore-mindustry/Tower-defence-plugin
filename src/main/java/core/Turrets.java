@@ -18,6 +18,7 @@ public class Turrets {
             Building b = event.tile.build;
             if (b instanceof ItemTurret.ItemTurretBuild || b instanceof LiquidTurret.LiquidTurretBuild) {
                 if (!activeTurrets.contains(b)) {
+                    if (b.block == DpContent.dpGauss) return;
                     activeTurrets.add(b);
                 }
             }
