@@ -52,4 +52,14 @@ public class TowerGetter {
 
         return false;
     }
+
+    public String getRequirementMessage(String towerName) {
+        for (TowerUnlock tower : towers) {
+            if (tower.getTowerName().equals(towerName)) {
+                return tower.getRequirementMessage();
+            }
+        }
+
+        return null;
+    }
 }

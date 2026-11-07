@@ -43,8 +43,8 @@ public class Main extends Plugin {
 
         Events.run(EventType.Trigger.update, this::update);
 
-        Events.on(EventType.BlockBuildBeginEvent.class, event -> {
-            DpContent.onBlockBuildBeginEvent(event, towerGetter);
+        Events.on(EventType.BuildSelectEvent.class, event -> {
+            DpContent.onBuildSelectEvent(event, towerGetter);
         });
 
         Events.on(EventType.BlockBuildEndEvent.class, e -> {

@@ -58,7 +58,7 @@ public class WaveSpawner {
             return;
         }
 
-        healthMultiplier = 0.25f * Mathf.pow(1.0525f, currentWave);
+        healthMultiplier = 0.25f * Mathf.pow(1.04f, currentWave);
 
         int unitCount = Mathf.random(5 + currentWave / 2, 10 + currentWave / 2);
 

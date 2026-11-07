@@ -1,4 +1,3 @@
-
 package core.towerGetter;
 
 import arc.Core;
@@ -144,5 +143,9 @@ public abstract class TowerUnlock {
         } catch (Exception e) {
             throw new RuntimeException("Failed to save tower whitelist: " + file.path(), e);
         }
+    }
+
+    public String getRequirementMessage() {
+        return "[scarlet]Map " + mapName + " is not completed. Complete " + mapName + "(wave: " + targetWave +") map to unlock " + displayName + ".";
     }
 }
